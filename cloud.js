@@ -13,3 +13,5 @@ AV.Cloud.beforeSave('_User', function(request) {
     request.object.set('is_rescuer', true);
   }
 });
+
+
