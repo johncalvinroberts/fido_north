@@ -6,6 +6,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var AV = require('leanengine');
+var countries = require('./utils/countries');
 
 // 加载云函数定义，你可以将云函数拆分到多个文件方便管理，但需要在主文件中加载它们
 require('./cloud');
@@ -34,6 +35,10 @@ app.use(cookieParser());
 
 app.get('/', function(req, res) {
   res.render('index', { currentTime: new Date() });
+});
+
+app.get('/countries', function(req, res) {
+  res.render(countries);
 });
 
 app.use(function(req, res, next) {

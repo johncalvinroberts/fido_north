@@ -22,7 +22,7 @@ AV.Cloud.afterUpdate('_User', function(request) {
     if (adopterCredentials && rescuerCredentials) {
       console.log('user verified as rescuer');
       request.object.set('adoptVerified', true);
-      request.object.set('is_rescuer', true);
+      request.object.set('isRescuer', true);
       request.object
         .save()
         .then(function(user) {
