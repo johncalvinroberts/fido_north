@@ -3,7 +3,7 @@ var AV = require('leanengine');
 
 // update the users verification and role depending on credentials given
 
-AV.Cloud.beforeUpdate('_User', function(request) {
+AV.Cloud.afterUpdate('_User', function(request) {
   console.log('user update hook');
   return new Promise(function(resolve, reject){
     var adopterCredentials = request.object.get('personalNote') && request.object.get('wechatId') && request.object.get('age');
