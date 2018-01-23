@@ -2,7 +2,7 @@ var AV = require('leanengine');
 
 
 // update the users verification and role depending on credentials given
-AV.Cloud.beforeSave('_User', function(request) {
+AV.Cloud.beforeUpdate('_User', function(request) {
   console.log('USER SAVE')
   var adopterCredentials = request.object.get('personalNote') && request.object.get('wechatId');
   var rescuerCredentials = request.object.get('id_number') && request.object.get('id_type')
