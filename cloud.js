@@ -6,8 +6,10 @@ var AV = require('leanengine');
 AV.Cloud.afterUpdate('_User', function(request) {
   console.log('user update hook');
   return new Promise(function(resolve, reject){
-    var adopterCredentials = request.object.get('personalNote') && request.object.get('wechatId') && request.object.get('age');
+    var adopterCredentials = request.object.get('personalNote') && request.object.get('wxUsername') && request.object.get('age');
     var rescuerCredentials = request.object.get('idNumber') && request.object.get('idType') && request.object.get('age');
+    console.log(adopterCredentials)
+    console.log(rescuerCredentials)
     if(adopterCredentials && !rescuerCredentials) {
       console.log('hey')
       request.object.set('adoptVerified', true);
