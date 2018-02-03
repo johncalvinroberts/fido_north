@@ -1,22 +1,18 @@
-var AV = require('leanengine');
+const Lean = require('leanengine');
+const axios = require('axios');
 
 
-// update the users verification and role depending on credentials given
-
-// AV.Cloud.afterUpdate('_User', function(request) {
-//   console.log('user update hook');
-//   return new Promise(function(resolve, reject){
-//     var adopterCredentials = request.object.get('personalNote') && request.object.get('wxUsername') && request.object.get('age');
-//     var rescuerCredentials = request.object.get('idNumber') && request.object.get('idType') && request.object.get('age');
-//     if(adopterCredentials && rescuerCredentials) {
-//       request.object.set('adoptVerified', true);
-//       request.object
-//         .save()
-//         .then(function(user) {
-//         console.log('successfully updated adopterVerified');
-//         resolve(user);
-//       })
-//         .catch(err => reject(err));
-//     }
-//   });
-// });
+Lean.Cloud.afterUpdate('Animal', function(request) {
+  return new Promise(function(resolve, reject){
+    //
+    if (request.object.attributes && request.object.attributes.location) {
+      const {latitude, longitude} = request.object.attributes.location
+      const requestUrl = `https://restapi.amap.com/v3/geocode/regeo?output=json&location=${longitude},${latitude}&key=63c62f4f4a84b92235f7bd33c94ffcfa`
+      axios.get(requestUrl)
+        .then(res => {
+          const address = res.data.formatted_address
+        })
+        .catch(err => console.log(err))
+    }
+  });
+});
