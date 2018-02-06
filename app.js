@@ -8,21 +8,20 @@ var bodyParser = require('body-parser');
 var AV = require('leanengine');
 var countries = require('./utils/countries');
 
-// 加载云函数定义，你可以将云函数拆分到多个文件方便管理，但需要在主文件中加载它们
+// load the cloud function
 require('./cloud');
 
 var app = express();
 
-// 设置模板引擎
+// template engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(express.static('public'));
 
-// 设置默认超时时间
 app.use(timeout('15s'));
 
-// 加载云引擎中间件
+// Leancloud middle ware
 app.use(AV.express());
 
 app.enable('trust proxy');
@@ -38,11 +37,12 @@ app.get('/', function(req, res) {
 });
 
 app.get('/countries', function(req, res) {
-  res.render(countries);
+  res.send(countries);
 });
 
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器
+  // if a path has no response, throw a 404 and deal with error at next
   if (!res.headersSent) {
     var err = new Error('Not Found');
     err.status = 404;
@@ -53,7 +53,7 @@ app.use(function(req, res, next) {
 // error handlers
 app.use(function(err, req, res, next) {
   if (req.timedout && req.headers.upgrade === 'websocket') {
-    // 忽略 websocket 的超时
+    // ignore websocket timeouts
     return;
   }
 
@@ -65,10 +65,10 @@ app.use(function(err, req, res, next) {
     console.error('请求超时: url=%s, timeout=%d, 请确认方法执行耗时很长，或没有正确的 response 回调。', req.originalUrl, err.timeout);
   }
   res.status(statusCode);
-  // 默认不输出异常详情
+  // don't print error details by default
   var error = {};
   if (app.get('env') === 'development') {
-    // 如果是开发环境，则将异常堆栈输出到页面，方便开发调试
+    // render errors on page if in dev environment
     error = err;
   }
   res.render('error', {
