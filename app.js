@@ -36,6 +36,11 @@ app.get('/', function(req, res) {
   res.render('index', { currentTime: new Date() });
 });
 
+app.get('/pinger', function(req, res) {
+  res.send(countries)
+  console.log('hey, u pinged me. thanks for waking me up.')
+})
+
 app.get('/countries', function(req, res) {
   res.send(countries);
 });
