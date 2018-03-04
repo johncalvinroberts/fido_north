@@ -1,7 +1,9 @@
 var Lean = require('leanengine');
 var axios = require('axios');
 var _isEmpty = require('lodash.isempty');
-// add neighboard after saving animal
+
+// add neighborhood after saving animal
+
 Lean.Cloud.afterUpdate('Animal', function(request) {
   return new Promise(function(resolve, reject){
     var count = 0;
@@ -59,6 +61,7 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
 });
 
 // delete likes and applications when animal is deleted
+
 Lean.Cloud.afterDelete('Animal', function(request) {
   var animal = Lean.Object.createWithoutData('Animal', request.object.id);
   var likesReq = new Lean.Query('Like').equalTo('animal', animal).find();
@@ -79,16 +82,23 @@ Lean.Cloud.afterDelete('Animal', function(request) {
     })
 });
 
+
+// get access code
 Lean.Cloud.define('getAccessCode', function (request) {
   var requestUrl = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${process.env.appId}&secret=${process.env.secretKey}`
-  axios.get(requestUrl)
-    .then(res => {
-      console.log('got the access codeeyy')
-      return res
-    })
-    .catch(err => {
-      return new Error(err)
-    })
+  return new Promise((resolve, reject) => {
+    axios.get(requestUrl)
+      .then(({data}) => {
+        console.log('got dat access token hyuh')
+        var token = new Lean.Object('AccessToken', data)
+        return token.save()
+      })
+      .then(res => {
+        return resolve(res)
+      })
+      .catch(err => {
+        return reject(new Error(err))
+      })
+  })
 });
-
 
