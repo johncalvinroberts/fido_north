@@ -32,7 +32,7 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
                 }
               })
             }
-            if (_isEmpty(neighborhood) || neighborhood == '') {
+            if (_isEmpty(neighborhood) || neighborhood == '' || !neighborhood) {
               neighborhood = 'somewhere...'
             }
             request.object.set('neighborhood', neighborhood);
