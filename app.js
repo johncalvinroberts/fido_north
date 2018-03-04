@@ -6,6 +6,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var AV = require('leanengine');
+var axios = require('axios');
 var countries = require('./utils/countries');
 
 // load the cloud function
@@ -40,6 +41,8 @@ app.get('/pinger', function(req, res) {
   res.send(countries)
   console.log('hey, u pinged me. thanks for waking me up.')
 })
+
+
 
 app.get('/countries', function(req, res) {
   res.send(countries);

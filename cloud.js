@@ -1,18 +1,39 @@
 var Lean = require('leanengine');
 var axios = require('axios');
-
-
+var _isEmpty = require('lodash.isempty');
+// add neighboard after saving animal
 Lean.Cloud.afterUpdate('Animal', function(request) {
   return new Promise(function(resolve, reject){
     var count = 0;
     if (request.object.attributes && request.object.attributes.location) {
       var {latitude, longitude} = request.object.attributes.location
       var requestUrl = `https://restapi.amap.com/v3/geocode/regeo?output=json&location=${longitude},${latitude}&key=63c62f4f4a84b92235f7bd33c94ffcfa`
-      var getNeighborhood = function() {
+      var getNeighborhood = function () {
         axios.get(requestUrl)
           .then(res => {
             var addressObj = res.data.regeocode.addressComponent;
             var neighborhood = addressObj.province + addressObj.district + addressObj.township;
+            if (!neighborhood) {
+              Object.keys(addressObj).map(function(field) {
+                if (!_isEmpty(addressObj[field]) && isNaN(addressObj[field]) && addressObj[field] !== null) {
+                  if (typeof addressObj[field] !== 'object') {
+                    neighborhood = neighborhood + addressObj[field]
+                  } else {
+                    Object.keys(addressObj[field]).map(function(subField) {
+                      var fieldObj = addressObj[field][subField]
+                      if (!_isEmpty(fieldObj) && isNaN(fieldObj) && fieldObj !== null && typeof fieldObj !== 'object') {
+                        if (subField !== 'location') {
+                          neighborhood = neighborhood + fieldObj
+                        }
+                      }
+                    })
+                  }
+                }
+              })
+            }
+            if (_isEmpty(neighborhood)) {
+              neighborhood = 'somewhere...'
+            }
             request.object.set('neighborhood', neighborhood);
             return request.object.save();
           })
@@ -35,3 +56,38 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
     }
   });
 });
+
+// delete likes and applications when animal is deleted
+Lean.Cloud.afterDelete('Animal', function(request) {
+  var animal = Lean.Object.createWithoutData('Animal', request.object.id);
+  var likesReq = new Lean.Query('Like').equalTo('animal', animal).find();
+  var appsReq = new Lean.Query('Application').equalTo('animal', animal).find();
+  return Promise.all([likesReq, appsReq])
+    .then((likesRes, appsRes) => {
+      console.log()
+      var likesDelReq = Lean.Object.destroyAll(likesRes)
+      var appsDelReq = Lean.Object.destroyAll(appsRes)
+      return Promise.all([likesDelReq, appsDelReq])
+    })
+    .then((likesDelRes, appsDelRes) => {
+      console.log('yes, deleted the relations')
+    })
+    .catch(err=> {
+      console.log('oh dear, something went wrong: ' + err.code + ': ' + err.message);
+      console.dir(err);
+    })
+});
+
+Lean.Cloud.define('getAccessCode', function (request) {
+  var requestUrl = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${process.env.appId}&secret=${process.env.secretKey}`
+  axios.get(requestUrl)
+    .then(res => {
+      console.log('got the access codeeyy')
+      return res
+    })
+    .catch(err => {
+      return new Error(err)
+    })
+});
+
+
