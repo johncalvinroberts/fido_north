@@ -102,3 +102,25 @@ Lean.Cloud.define('getAccessCode', function (request) {
   })
 });
 
+Lean.Cloud.define('generateQrCode', function ({params}) {
+  console.log(params.id)
+  return new Promise((resolve, reject) => {
+    const query = new Lean.Query('AccessToken').descending('createdAt').limit(1)
+    query.find()
+      .then(res => {
+        // const requestUrl = `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessTokenRes[0].attributes.access_token}`
+        const requestUrl = `https://api.weixin.qq.com/wxa/getwxacode?access_token=${res[0].attributes.access_token}`
+        const data = {path: `/pages/animal-profile?animal=${params.id}`}
+        return axios.post(requestUrl, data)
+      })
+      .then(({data}) => {
+        console.log('successfully got qr code blob')
+        return resolve(data)
+      })
+      .catch(err => {
+        console.log('oh dear. it broke.')
+        console.log(err)
+        return reject(err)
+      })
+  })
+})
