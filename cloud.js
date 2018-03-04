@@ -11,6 +11,7 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
       var getNeighborhood = function () {
         axios.get(requestUrl)
           .then(res => {
+            console.log('in the geocode response')
             var addressObj = res.data.regeocode.addressComponent;
             var neighborhood = addressObj.province + addressObj.district + addressObj.township;
             if (!neighborhood) {
@@ -31,7 +32,7 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
                 }
               })
             }
-            if (_isEmpty(neighborhood)) {
+            if (_isEmpty(neighborhood) || neighborhood == '') {
               neighborhood = 'somewhere...'
             }
             request.object.set('neighborhood', neighborhood);
