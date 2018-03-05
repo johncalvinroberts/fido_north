@@ -84,17 +84,14 @@ Lean.Cloud.afterDelete('Animal', function(request) {
 
 
 // get access code
-Lean.Cloud.define('getAccessCode', function (request) {
+Lean.Cloud.define('getAccessCode', function () {
   var requestUrl = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${process.env.appId}&secret=${process.env.secretKey}`
   return new Promise((resolve, reject) => {
     axios.get(requestUrl)
       .then(({data}) => {
-        console.log('got dat access token hyuh')
-        var token = new Lean.Object('AccessToken', data)
-        return token.save()
-      })
-      .then(res => {
-        return resolve(res)
+        console.log(`got dat access token hyuh. Time is ${new Date()}`)
+        process.env['wx_access_token'] = data.access_token
+        return resolve()
       })
       .catch(err => {
         return reject(new Error(err))
@@ -104,30 +101,28 @@ Lean.Cloud.define('getAccessCode', function (request) {
 
 Lean.Cloud.define('generateQrCode', function ({params}) {
   return new Promise((resolve, reject) => {
-    var query = new Lean.Query('AccessToken').descending('createdAt').limit(1)
-    query.find()
-      .then(res => {
-        // const requestUrl = `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessTokenRes[0].attributes.access_token}`
-        var requestUrl = `https://api.weixin.qq.com/wxa/getwxacode?access_token=${res[0].attributes.access_token}`
-        var data = {path: `/pages/animal-profile?animal=${params.id}`}
-        return axios.post(requestUrl, data)
-      })
-      .then(({data}) => {
-        var base64data = new Buffer(data.toString(), 'binary').toString('base64')
-        // const file = new Lean.File(`qr_${params.id}.png`, {base64: base64data}, 'image/png')
-        // return file.save()
-        return resolve(base64data)
-      })
-      // .then(res => {
-      //   console.log('saved the qr code url to db')
-      //   console.log(res)
-      //   return resolve(res)
-      // })
-      .catch(err => {
-        console.log('oh dear. it broke.')
-        console.log(err)
-        return reject(err)
-      })
+    if (!process.env.wx_access_token) {
+      Lean.Cloud.run('getAccessCode')
+        .then(res => getQrCode())
+        .catch(err => console.log(err))
+    } else {
+      getQrCode()
+    }
+    var getQrCode = () => {
+      var requestUrl = `https://api.weixin.qq.com/wxa/getwxacode?access_token=${process.env.wx_access_token}`
+      var data = {path: `/pages/animal-profile?animal=${params.id}`}
+      axios.post(requestUrl, data, {responseType: 'arraybuffer'})
+        .then(({data}) => {
+          var file = new Lean.File(`qr_${params.id}.png`, data, 'image/png')
+          return file.save()
+        })
+        .then(res => {
+          return resolve(res)
+        })
+        .catch(err => {
+          return reject(err)
+        })
+    }
   })
 })
 
