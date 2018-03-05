@@ -89,7 +89,7 @@ Lean.Cloud.define('getAccessCode', function () {
   return new Promise((resolve, reject) => {
     axios.get(requestUrl)
       .then(({data}) => {
-        console.log(`got dat access token hyuh. Time is ${new Date()}`)
+        console.log(`Time is ${new Date()}. Got WX access token. `)
         process.env['wx_access_token'] = data.access_token
         return resolve()
       })
@@ -100,6 +100,7 @@ Lean.Cloud.define('getAccessCode', function () {
 });
 
 Lean.Cloud.define('generateQrCode', function ({params}) {
+  console.log('（；￣ェ￣）generating qr code!!')
   return new Promise((resolve, reject) => {
     if (!process.env.wx_access_token) {
       Lean.Cloud.run('getAccessCode')
