@@ -103,7 +103,6 @@ Lean.Cloud.define('getAccessCode', function (request) {
 });
 
 Lean.Cloud.define('generateQrCode', function ({params}) {
-  console.log(params.id)
   return new Promise((resolve, reject) => {
     const query = new Lean.Query('AccessToken').descending('createdAt').limit(1)
     query.find()
@@ -114,9 +113,16 @@ Lean.Cloud.define('generateQrCode', function ({params}) {
         return axios.post(requestUrl, data)
       })
       .then(({data}) => {
-        console.log('successfully got qr code blob')
+        // const base64data = new Buffer(data.toString(), 'binary').toString('base64')
+        // const file = new Lean.File(`qr_${params.id}.png`, {base64: base64data}, 'image/png')
+        // return file.save()
         return resolve(data)
       })
+      // .then(res => {
+      //   console.log('saved the qr code url to db')
+      //   console.log(res)
+      //   return resolve(res)
+      // })
       .catch(err => {
         console.log('oh dear. it broke.')
         console.log(err)
