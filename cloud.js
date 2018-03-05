@@ -113,10 +113,10 @@ Lean.Cloud.define('generateQrCode', function ({params}) {
         return axios.post(requestUrl, data)
       })
       .then(({data}) => {
-        // const base64data = new Buffer(data.toString(), 'binary').toString('base64')
+        const base64data = new Buffer(data.toString(), 'binary').toString('base64')
         // const file = new Lean.File(`qr_${params.id}.png`, {base64: base64data}, 'image/png')
         // return file.save()
-        return resolve(data)
+        return resolve(base64data)
       })
       // .then(res => {
       //   console.log('saved the qr code url to db')
