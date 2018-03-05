@@ -104,16 +104,16 @@ Lean.Cloud.define('getAccessCode', function (request) {
 
 Lean.Cloud.define('generateQrCode', function ({params}) {
   return new Promise((resolve, reject) => {
-    const query = new Lean.Query('AccessToken').descending('createdAt').limit(1)
+    var query = new Lean.Query('AccessToken').descending('createdAt').limit(1)
     query.find()
       .then(res => {
         // const requestUrl = `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessTokenRes[0].attributes.access_token}`
-        const requestUrl = `https://api.weixin.qq.com/wxa/getwxacode?access_token=${res[0].attributes.access_token}`
-        const data = {path: `/pages/animal-profile?animal=${params.id}`}
+        var requestUrl = `https://api.weixin.qq.com/wxa/getwxacode?access_token=${res[0].attributes.access_token}`
+        var data = {path: `/pages/animal-profile?animal=${params.id}`}
         return axios.post(requestUrl, data)
       })
       .then(({data}) => {
-        const base64data = new Buffer(data.toString(), 'binary').toString('base64')
+        var base64data = new Buffer(data.toString(), 'binary').toString('base64')
         // const file = new Lean.File(`qr_${params.id}.png`, {base64: base64data}, 'image/png')
         // return file.save()
         return resolve(base64data)
@@ -130,3 +130,29 @@ Lean.Cloud.define('generateQrCode', function ({params}) {
       })
   })
 })
+
+
+Lean.Cloud.define('updateAnimalAges', function (request) {
+  return new Promise((resolve, reject) => {
+    var query = new Lean.Query('Animal')
+    query.find()
+      .then((animals) => {
+        animals.map(animal => animal.set({age: animal.attributes.age + 1}))
+        return Lean.Object.saveAll(animals)
+      })
+      .then(res => {
+        console.log('Successfully updated the animals')
+        return resolve(res)
+      })
+      .catch(err => {
+        console.log('oh dear. it broke.')
+        console.error(err)
+        return reject(err)
+      })
+  })
+})
+
+
+
+
+
