@@ -71,7 +71,7 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
         const neighborhoodPromise = _getGeoCode(requestUrl)
         const qrCodePromise = request.object.attributes.qrCodeUrl ? setTimeout(() => request.object.attributes.qrCodeUrl, 0) : Lean.Cloud.run('generateQrCode', {id})
         const [neighborhood, qrCodeRes] = await Promise.all([neighborhoodPromise, qrCodePromise])
-        const qrCodeUrl = qrCodeRes.attributes.url
+        const qrCodeUrl = qrCodeRes
         request.object.set({neighborhood, qrCodeUrl})
         const animal = await request.object.save()
         console.log(`Updated animal ${animal.attributes.name} qrCodeUrl and neighborhood. neighborhood: ${animal.attributes.neighborhood}`)
@@ -140,7 +140,7 @@ Lean.Cloud.define('generateQrCode', ({params}) => {
        await Lean.Cloud.run('getAccessCode')
      }
       const qrCodeRes = await _getQrCode(params.id)
-      return resolve(qrCodeRes)
+      return resolve(qrCodeRes.attributes.url)
     } catch (err) {
       return reject(err)
     }
