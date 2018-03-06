@@ -68,8 +68,9 @@ Lean.Cloud.afterUpdate('Animal', function(request) {
       const id = request.object.attributes.objectId
       const requestUrl = `https://restapi.amap.com/v3/geocode/regeo?output=json&location=${longitude},${latitude}&key=63c62f4f4a84b92235f7bd33c94ffcfa`
       try {
+        const _returnQrCode = () => request.object.attributes.qrCodeUrl
         const neighborhoodPromise = _getGeoCode(requestUrl)
-        const qrCodePromise = request.object.attributes.qrCodeUrl ? setTimeout(() => request.object.attributes.qrCodeUrl, 0) : Lean.Cloud.run('generateQrCode', {id})
+        const qrCodePromise = request.object.attributes.qrCodeUrl ? _returnQrCode() : Lean.Cloud.run('generateQrCode', {id})
         const [neighborhood, qrCodeRes] = await Promise.all([neighborhoodPromise, qrCodePromise])
         const qrCodeUrl = qrCodeRes
         request.object.set({neighborhood, qrCodeUrl})
