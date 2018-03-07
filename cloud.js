@@ -63,7 +63,8 @@ async function _getGeoCode (requestUrl) {
 // set qrCodeUrl and neighborhood of an animal after they are updated
 Lean.Cloud.afterUpdate('Animal', function(request) {
   return new Promise( async (resolve, reject) => {
-    if (request.object.attributes && request.object.attributes.location) {
+    if (request.object.attributes && request.object.attributes.location && !request.attributes.neighborhood) {
+      console.log('getting the neighborhood of mystery animal')
       const {latitude, longitude} = request.object.attributes.location
       const id = request.object.attributes.objectId
       const requestUrl = `https://restapi.amap.com/v3/geocode/regeo?output=json&location=${longitude},${latitude}&key=63c62f4f4a84b92235f7bd33c94ffcfa`
