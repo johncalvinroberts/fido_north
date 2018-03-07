@@ -61,7 +61,7 @@ async function _getGeoCode (requestUrl) {
 }
 
 // set qrCodeUrl and neighborhood of an animal after they are updated
-Lean.Cloud.afterUpdate('Animal', function(request) {
+Lean.Cloud.afterUpdate('Animal', (request) => {
   return new Promise( async (resolve, reject) => {
     if (request.object.attributes && request.object.attributes.location && !request.object.attributes.neighborhood) {
       console.log('getting the neighborhood of mystery animal')
@@ -123,7 +123,8 @@ Lean.Cloud.define('getAccessCode', () => {
 
 async function _getQrCode (id) {
   const requestUrl = `https://api.weixin.qq.com/wxa/getwxacode?access_token=${process.env.wx_access_token}`
-  const data = {path: `/pages/animal-profile?animal=${id}`}
+  // const data = {path: `/pages/animal-profile?animal=${id}`}
+  const data = {path: `/pages/landing?redirect=animal-profile&paramname=animal&paramvalue=${id}`}
   try {
     const rawQrCode = await axios.post(requestUrl, data, {responseType: 'arraybuffer'})
     var file = new Lean.File(`qr_${id}.png`, rawQrCode.data, 'image/png')
@@ -150,7 +151,7 @@ Lean.Cloud.define('generateQrCode', ({params}) => {
 })
 
 
-Lean.Cloud.define('updateAnimalAges', function (request) {
+Lean.Cloud.define('updateAnimalAges', (request) => {
   return new Promise(async (resolve, reject) => {
     try {
       const query = new Lean.Query('Animal')
