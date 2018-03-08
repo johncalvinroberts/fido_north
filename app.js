@@ -1,37 +1,37 @@
-'use strict';
-
-var express = require('express');
-var timeout = require('connect-timeout');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var AV = require('leanengine');
-var axios = require('axios');
-var countries = require('./utils/countries');
+const express = require('express')
+const timeout = require('connect-timeout')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const bodyParser = require('body-parser')
+const AV = require('leanengine')
+const axios = require('axios')
+const countries = require('./utils/countries')
+const favicon = require('serve-favicon')
 
 // load the cloud function
-require('./cloud');
+require('./cloud')
 
-var app = express();
+const app = express()
 
 // template engine
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'ejs')
 
-app.use(express.static('public'));
+app.use(express.static('public'))
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 
-app.use(timeout('15s'));
+app.use(timeout('15s'))
 
 // Leancloud middle ware
-app.use(AV.express());
+app.use(AV.express())
 
-app.enable('trust proxy');
+app.enable('trust proxy')
 // 需要重定向到 HTTPS 可去除下一行的注释。
 // app.use(AV.Cloud.HttpsRedirect());
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(cookieParser())
 
 app.get('/', function(req, res) {
   res.render('index', { currentTime: new Date() });
@@ -45,16 +45,16 @@ app.get('/pinger', function(req, res) {
 
 
 app.get('/countries', function(req, res) {
-  res.send(countries);
+  res.send(countries)
 });
 
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器
   // if a path has no response, throw a 404 and deal with error at next
   if (!res.headersSent) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+    var err = new Error('Not Found')
+    err.status = 404
+    next(err)
   }
 });
 
@@ -77,12 +77,12 @@ app.use(function(err, req, res, next) {
   var error = {};
   if (app.get('env') === 'development') {
     // render errors on page if in dev environment
-    error = err;
+    error = err
   }
   res.render('error', {
     message: err.message,
     error: error
-  });
-});
+  })
+})
 
 module.exports = app;
