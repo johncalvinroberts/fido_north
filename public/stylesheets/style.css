@@ -30,7 +30,6 @@ body {
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
-  /*height: 600px;*/
   height: auto;
   padding-top: 60%;
   max-height: 450px;
@@ -40,6 +39,11 @@ body {
 .bork-box {
   flex: 0 0 250px;
   padding-left: 25px;
+}
+
+h1, h2, h3, p {
+  letter-spacing: 3px;
+  line-height: 1.3;
 }
 
 h2 {
